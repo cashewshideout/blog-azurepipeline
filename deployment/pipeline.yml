@@ -1,0 +1,62 @@
+
+#Trigger builds only on the master branch
+#Add additional options for more branches to target
+trigger:
+- master
+
+#Run build for all Pull Requests targetting master branch
+#Add additional options for more branches to target
+pr:
+- master
+
+#Create a unique name for the build based on your project requirements
+#BuildID is the unique ID for the build
+name: $(Year:yy).$(Month).$(DayOfMonth).$(BuildID)-$(SourceBranchName)
+
+variables:
+  AgentImage: "windows-latest" #See available agent images: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
+  system.debug: true #Setting debug to true will add extra output to the logs but can be useful while trying to determine full reason for failures
+  DotNetCoreSDK: 3.x
+  Project: 'src/BasicCoreApp/**/*.csproj'
+  BuildConfiguration: 'Release'
+
+stages:
+- stage: 'Build_Stage' #Stage name cannot have spaces
+  displayName: 'Build' #This is what will be displayed when viewing in Azure DevOps
+  jobs:
+  - job: 'Build_Job'
+    displayName: 'Application Build'
+    pool:
+      vmImage: $(AgentImage)
+    steps:
+    - task: DotNetCoreInstaller@1
+      displayName: 'Use DotNet Core SDK'
+      inputs:
+        packageType: 'sdk'
+        version: $(DotNetCoreSDK)
+
+    - task: DotNetCoreCLI@2
+      displayName: Publish App
+      inputs:
+        command: publish
+        projects: $(Project)
+        arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/application'
+
+    - task: DotNetCoreCLI@2
+      displayName: Test
+      inputs:
+        command: test
+        projects: 'src/BasicCoreApp.Tests/**/*.csproj'
+        arguments: '--configuration $(BuildConfiguration)'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive build'
+      inputs:
+        rootFolderOrFile: '$(build.artifactstagingdirectory)/application'
+        includeRootFolder: false
+        archiveFile: '$(build.artifactstagingdirectory)/app/application.zip'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(build.artifactstagingdirectory)/app/application.zip'
+        artifactName: 'app'
