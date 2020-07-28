@@ -1,4 +1,3 @@
-
 #Trigger builds only on the master branch
 #Add additional options for more branches to target
 trigger:
@@ -16,37 +15,36 @@ name: $(Year:yy).$(Month).$(DayOfMonth).$(BuildID)-$(SourceBranchName)
 variables:
   AgentImage: "windows-latest" #See available agent images: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
   system.debug: true #Setting debug to true will add extra output to the logs but can be useful while trying to determine full reason for failures
-  DotNetCoreSDK: 3.x
-  Project: 'src/BasicCoreApp/**/*.csproj'
   BuildConfiguration: 'Release'
 
 stages:
 - stage: 'Build_Stage' #Stage name cannot have spaces
-  displayName: 'Build' #This is what will be displayed when viewing in Azure DevOps
+  displayName: 'Build' #Name displayed when viewing in Azure DevOps
   jobs:
-  - job: 'Build_Job'
-    displayName: 'Application Build'
+  - job: 'Build_Job' #Job name cannot have spaces
+    displayName: 'Application Build' #Name displayed when viewing in Azure DevOps
     pool:
-      vmImage: $(AgentImage)
+      vmImage: $(AgentImage) #See available agent images: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
     steps:
     - task: DotNetCoreInstaller@1
       displayName: 'Use DotNet Core SDK'
       inputs:
-        packageType: 'sdk'
-        version: $(DotNetCoreSDK)
+        version: 3.x
 
     - task: DotNetCoreCLI@2
       displayName: Publish App
       inputs:
-        command: publish
-        projects: $(Project)
+        command: publish  #The publish command does a restore, build and creates a zip file so no need to add extra steps
+        publishWebProjects: true
+        zipAfterPublish: false
+        projects: '**/BasicCoreApp/*.csproj'
         arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/application'
 
     - task: DotNetCoreCLI@2
       displayName: Test
       inputs:
-        command: test
-        projects: 'src/BasicCoreApp.Tests/**/*.csproj'
+        command: test #Don't forget to test!
+        projects: '**/*.Tests.csproj'
         arguments: '--configuration $(BuildConfiguration)'
 
     - task: ArchiveFiles@2
@@ -56,7 +54,70 @@ stages:
         includeRootFolder: false
         archiveFile: '$(build.artifactstagingdirectory)/app/application.zip'
 
-    - task: PublishPipelineArtifact@1
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
       inputs:
-        targetPath: '$(build.artifactstagingdirectory)/app/application.zip'
+        pathtoPublish: '$(build.artifactstagingdirectory)\app\application.zip' #Publish (different from the command used above) allows the artifact to be used in later jobs
         artifactName: 'app'
+
+- stage: 'Staging' #Stage name cannot have spaces
+  displayName: 'Staging' #Name displayed when viewing in Azure DevOps
+  dependsOn: ['Build_Stage'] #List of previous stages that must complete before this stage runs
+  jobs:
+  - deployment: Deploy_Staging #No spaces
+    displayName: Staging Deployment #Name displayed in UI
+    pool:
+      vmImage: $(AgentImage) #variable that was defined previously (not shown in this snippet)
+    environment: Staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: 'app'
+          - task: ExtractFiles@1
+            displayName: 'Extract files'
+            inputs:
+              archiveFilePatterns: "$(Pipeline.Workspace)/app/application.zip"
+              destinationFolder: "$(Pipeline.Workspace)/files"
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Azure App Service Deploy'
+            inputs:
+              ConnectionType: 'AzureRM' #This is the default Value
+              WebAppKind: 'webApp' #This is the default value
+              azureSubscription: 'PipelineApp Azure Connection' #Name of the Service Connection previously created
+              WebAppName: 'stg-MWKS-PipelineApp' #Name of the App Service to be deployed to
+              Package: '$(Pipeline.Workspace)/files/BasicCoreApp' #Application files to be deployed
+              enableCustomDeployment: true #These two properties override the default of having
+              DeploymentType: 'webDeploy'  #the pipeline deciding for us what it thinks the best deployment option should be
+
+- stage: 'Production' #Stage name cannot have spaces
+  displayName: 'Production' #Name displayed when viewing in Azure DevOps
+  dependsOn: ['Build_Stage', 'Staging'] #List of previous stages that must complete before this stage runs
+  jobs:
+  - deployment: Deploy_Production #No spaces
+    displayName: Production Deployment #Name displayed in UI
+    pool:
+      vmImage: $(AgentImage) #variable that was defined previously (not shown in this snippet)
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: 'app'
+          - task: ExtractFiles@1
+            displayName: 'Extract files'
+            inputs:
+              archiveFilePatterns: "$(Pipeline.Workspace)/app/application.zip"
+              destinationFolder: "$(Pipeline.Workspace)/files"
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Azure App Service Deploy'
+            inputs:
+              ConnectionType: 'AzureRM' #This is the default Value
+              WebAppKind: 'webApp' #This is the default value
+              azureSubscription: 'PipelineApp Azure Connection' #Name of the Service Connection previously created
+              WebAppName: 'prod-MWKS-PipelineApp' #Name of the App Service to be deployed to
+              Package: '$(Pipeline.Workspace)/files/BasicCoreApp' #Application files to be deployed
+              enableCustomDeployment: true #These two properties override the default of having
+              DeploymentType: 'webDeploy'  #the pipeline deciding for us what it thinks the best deployment option should be
