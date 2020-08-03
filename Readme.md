@@ -10,3 +10,6 @@ This branch is a completion of Part 1 and a starting point while walking through
 
 [post2-release](https://github.com/cashewshideout/blog-azurepipeline/tree/post2-release)
 This branch is a completion of Part 3 and a starting point while walking through an upcoming Part 3
+
+[post3-variablegroups](https://github.com/cashewshideout/blog-azurepipeline/tree/post3-variablegroups)
+This branch is a completion of the section for Variables in Post 3
