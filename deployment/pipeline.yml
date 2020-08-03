@@ -75,26 +75,13 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: 'app'
           - script: |
-              echo You can read this variable: $(Readme)
-              echo You cannot read this secret variable: $(Secret)
-          - task: ExtractFiles@1
-            displayName: 'Extract files'
-            inputs:
-              archiveFilePatterns: "$(Pipeline.Workspace)/app/application.zip"
-              destinationFolder: "$(Pipeline.Workspace)/files"
-          - task: AzureRmWebAppDeployment@4
-            displayName: 'Azure App Service Deploy'
-            inputs:
-              ConnectionType: 'AzureRM' #This is the default Value
-              WebAppKind: 'webApp' #This is the default value
-              azureSubscription: 'PipelineApp Azure Connection' #Name of the Service Connection previously created
-              WebAppName: 'stg-MWKS-PipelineApp' #Name of the App Service to be deployed to
-              Package: '$(Pipeline.Workspace)/files/BasicCoreApp' #Application files to be deployed
-              enableCustomDeployment: true #These two properties override the default of having
-              DeploymentType: 'webDeploy'  #the pipeline deciding for us what it thinks the best deployment option should be
+              echo Run this script before the steps in the template
+          - template: templates/appdeployment.yml  # Template reference
+            parameters:
+              webappname: 'stg-MWKS-PipelineApp'
+          - script: |
+              echo Run this script after the steps in the template
 
 - stage: 'Production' #Stage name cannot have spaces
   displayName: 'Production' #Name displayed when viewing in Azure DevOps
@@ -111,23 +98,6 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: 'app'
-          - script: |
-              echo You can read this variable: $(Readme)
-              echo You cannot read this secret variable: $(Secret)
-          - task: ExtractFiles@1
-            displayName: 'Extract files'
-            inputs:
-              archiveFilePatterns: "$(Pipeline.Workspace)/app/application.zip"
-              destinationFolder: "$(Pipeline.Workspace)/files"
-          - task: AzureRmWebAppDeployment@4
-            displayName: 'Azure App Service Deploy'
-            inputs:
-              ConnectionType: 'AzureRM' #This is the default Value
-              WebAppKind: 'webApp' #This is the default value
-              azureSubscription: 'PipelineApp Azure Connection' #Name of the Service Connection previously created
-              WebAppName: 'prod-MWKS-PipelineApp' #Name of the App Service to be deployed to
-              Package: '$(Pipeline.Workspace)/files/BasicCoreApp' #Application files to be deployed
-              enableCustomDeployment: true #These two properties override the default of having
-              DeploymentType: 'webDeploy'  #the pipeline deciding for us what it thinks the best deployment option should be
+          - template: templates/appdeployment.yml  # Template reference
+            parameters:
+              webappname: 'prod-MWKS-PipelineApp'
