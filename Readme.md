@@ -9,4 +9,10 @@ Use the files in this branch as a starting point while walking through [Part 1](
 This branch is a completion of Part 1 and a starting point while walking through [Part 2](https://www.mercuryworks.com/multistage-pipeline-azure-devops-pt2/)
 
 [post2-release](https://github.com/cashewshideout/blog-azurepipeline/tree/post2-release)
-This branch is a completion of Part 3 and a starting point while walking through an upcoming Part 3
+This branch is a completion of Part 2 and a starting point while walking through [Part 3](https://www.mercuryworks.com/blog/azure-devops-multi-stage-pipelines-part-3/)
+
+[post3-templates](https://github.com/cashewshideout/blog-azurepipeline/tree/post3-templates)
+This branch is a completion of the section for Templates in Part 3
+
+[post3-variablegroups](https://github.com/cashewshideout/blog-azurepipeline/tree/post3-variablegroups)
+This branch is a completion of the section for Variables in Part 3
