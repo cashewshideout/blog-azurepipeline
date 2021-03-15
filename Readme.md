@@ -1,15 +1,35 @@
 # Azure DevOps Multi-stage Pipelines
 
-This repository includes support files for a three part blog post on Multi-stage Pipelines in Azure DevOps.
+This repository includes support files for an ongoing blog post series about Multi-stage Pipelines in Azure DevOps.
 
-[main](https://github.com/cashewshideout/blog-azurepipeline)
-Use the files in this branch as a starting point while walking through [Part 1](https://www.mercuryworks.com/creating-a-multi-stage-pipeline-in-azure-devops/)
+## Creating an Azure DevOps Multi-Stage Pipeline - Part 1
 
-[post1-build](https://github.com/cashewshideout/blog-azurepipeline/tree/post1-build)
-This branch is a completion of Part 1 and a starting point while walking through [Part 2](https://www.mercuryworks.com/multistage-pipeline-azure-devops-pt2/)
+### Blog Post
 
-[post2-release](https://github.com/cashewshideout/blog-azurepipeline/tree/post2-release)
-This branch is a completion of Part 3 and a starting point while walking through an upcoming Part 3
+https://www.mercuryworks.com/creating-a-multi-stage-pipeline-in-azure-devops/
 
-[post3-variablegroups](https://github.com/cashewshideout/blog-azurepipeline/tree/post3-variablegroups)
-This branch is a completion of the section for Variables in Post 3
+### Supporting branches
+
+[main](https://github.com/cashewshideout/blog-azurepipeline) - This branch has a basic .Net Core application that can be used as a starting point for this post
+
+[post1-build](https://github.com/cashewshideout/blog-azurepipeline/tree/post1-build) - This branch has completed files for this post
+
+## Creating an Azure DevOps Multi-Stage Pipeline - Part 2
+
+### Blog Post
+
+https://www.mercuryworks.com/multistage-pipeline-azure-devops-pt2/
+
+### Supporting branches
+
+[post1-build](https://github.com/cashewshideout/blog-azurepipeline/tree/post1-build) - Starting files for this post
+
+[post2-release](https://github.com/cashewshideout/blog-azurepipeline/tree/post2-release) - Completed pipeline and files for this post
+
+## Azure DevOps Multi-Stage Pipelines - Part 3
+
+[post2-release](https://github.com/cashewshideout/blog-azurepipeline/tree/post2-release) - Starting files for this post
+
+[post3-templates](https://github.com/cashewshideout/blog-azurepipeline/tree/post3-templates) - Completed pipeline and files for the Templates section in this post
+
+[post3-variablegroups](https://github.com/cashewshideout/blog-azurepipeline/tree/post3-variablegroups) - Completed pipeline and files for the Variables section in this post
